@@ -13,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import { getCorrectImg } from "../utils/getCorrectImg";
 import Error from "../components/Error/Error";
+import { useCallback } from "react";
 function MovieInfo() {
   const { id } = useParams();
   const { language } = useSelector((state) => state.moviesFilters.filters);
@@ -22,25 +23,27 @@ function MovieInfo() {
   const { isLoggedIn } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
-  const getMoviesInfo = async (lang) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      await fetchMovieInfo(id, lang).then((res) => {
-        const withImg = {
-          backdrop_path: getCorrectImg(res.backdrop_path),
-          poster_path: getCorrectImg(res.poster_path),
-        };
-        setMovieInfo({ ...res, ...withImg });
+  const getMoviesInfoMemo = useCallback(
+    async (lang) => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        await fetchMovieInfo(id, lang).then((res) => {
+          const withImg = {
+            backdrop_path: getCorrectImg(res.backdrop_path),
+            poster_path: getCorrectImg(res.poster_path),
+          };
+          setMovieInfo({ ...res, ...withImg });
+          setIsLoading(false);
+        });
+      } catch (e) {
+        setMovieInfo({});
         setIsLoading(false);
-      });
-    } catch (e) {
-      setMovieInfo({});
-      setIsLoading(false);
-      setError(e);
-    }
-  };
-
+        setError(e);
+      }
+    },
+    [id]
+  );
   useEffect(() => {
     if (!isLoggedIn) {
       dispatch(checkUser());
@@ -48,8 +51,8 @@ function MovieInfo() {
   }, [dispatch, isLoggedIn]);
 
   useEffect(() => {
-    getMoviesInfo(language);
-  }, [id, language]);
+    getMoviesInfoMemo(language);
+  }, [id, language, getMoviesInfoMemo]);
   return (
     <>
       {isLoading ? (

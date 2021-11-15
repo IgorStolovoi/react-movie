@@ -11,6 +11,7 @@ import * as auth from "../../api/auth";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserInfo } from "../../thunks/user";
+import { useCallback } from "react";
 function LoginForm() {
   const [formState, setFormState] = useState({
     userName: "",
@@ -35,14 +36,17 @@ function LoginForm() {
       `https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=http://localhost:3000/login`
     );
   };
-  const generateSession = async (token) => {
-    await auth.getSessionId(token).then((id) => {
-      localStorage.setItem("session_id", id);
-      dispatch(fetchUserInfo(id));
-      navigate("/movies");
-    });
-  };
 
+  const generateSession = useCallback(
+    async (token) => {
+      await auth.getSessionId(token).then((id) => {
+        localStorage.setItem("session_id", id);
+        dispatch(fetchUserInfo(id));
+        navigate("/movies");
+      });
+    },
+    [dispatch, navigate]
+  );
   useEffect(() => {
     if (isLoggedIn) {
       navigate("/movies");

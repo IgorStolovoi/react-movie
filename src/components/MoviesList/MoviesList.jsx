@@ -18,7 +18,7 @@ function MoviesList({
 }) {
   useEffect(() => {
     fetchMoviesList(searchString);
-  }, [searchString]);
+  }, [searchString, fetchMoviesList]);
 
   const onPageChange = (_, value) => {
     changePage(value);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { fetchFavoriteList } from "../api/fetchFavorites";
 import MoviesList from "../components/MoviesList/MoviesList";
 import noPhoto from "../assets/img/no_poster.jpg";
@@ -12,7 +12,8 @@ function Favorites() {
   const [error, setError] = useState(null);
   const { isLoggedIn } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const getFavorites = async () => {
+
+  const getFavoritesMemo = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -34,7 +35,8 @@ function Favorites() {
       setIsLoading(false);
       setError(e);
     }
-  };
+  }, [page]);
+
   useEffect(() => {
     if (!isLoggedIn) dispatch(checkUser());
   }, [isLoggedIn, dispatch]);
@@ -45,7 +47,7 @@ function Favorites() {
       </Typography>
       <MoviesList
         moviesList={favorites.results}
-        fetchMoviesList={getFavorites}
+        fetchMoviesList={getFavoritesMemo}
         err={error}
         totalPages={favorites.total_pages}
         currentPage={page}
